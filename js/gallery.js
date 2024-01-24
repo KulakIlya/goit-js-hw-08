@@ -48,11 +48,25 @@ const images = [
 
 const galleryEl = document.querySelector('.gallery');
 
-function getGalleryMarkup() {
+const instance = basicLightbox.create(
+  `<div>
+      <img src="" alt="" />
+    </div>`,
+  {
+    onShow() {
+      document.addEventListener('keydown', onEscape);
+    },
+    onClose() {
+      document.removeEventListener('keydown', onEscape);
+    },
+  }
+);
+
+const getGalleryMarkup = () => {
   return images
     .map(
       ({ preview, original, description }) => `<li class="gallery-item">
-      <a class="gallery-link" href="">
+      <a class="gallery-link" href="${original}">
         <img
           class="gallery-image"
           src="${preview}"
@@ -63,12 +77,12 @@ function getGalleryMarkup() {
     </li>`
     )
     .join('');
-}
+};
 
-function onEscape(e, instance) {
-  if (e.code !== 'Escape' || !instance.visible()) return;
+const onEscape = e => {
+  if (e.code !== 'Escape') return;
   instance.close();
-}
+};
 
 galleryEl.insertAdjacentHTML('beforeend', getGalleryMarkup());
 
@@ -80,13 +94,10 @@ galleryEl.addEventListener('click', e => {
   const { source } = elem.dataset;
   const description = elem.attributes.alt.textContent;
 
-  const instance = basicLightbox.create(
-    `<div>
-        <img src="${source}" alt="${description}" />
-      </div>`
-  );
+  const basicLightboxElement = instance.element().querySelector('img');
+
+  basicLightboxElement.src = source;
+  basicLightboxElement.alt = description;
+
   instance.show();
-  document.addEventListener('keydown', e => {
-    onEscape(e, instance);
-  });
 });
